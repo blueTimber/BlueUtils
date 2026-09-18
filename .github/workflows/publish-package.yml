@@ -1,0 +1,35 @@
+name: Publish Unity Package
+
+on:
+  push:
+    tags:
+      - "v*"   # trigger on tags like v1.2.0
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # needed for subtree split
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Split package subfolder into its own branch
+        run: |
+          git subtree split --prefix=Assets/BlueUtils -b upm
+
+      - name: Push package branch
+        run: |
+          git push origin upm:upm --force
+
+      - name: Tag the published branch with the same version
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          git checkout upm
+          git tag "$VERSION" -f
+          git push origin "$VERSION" -f
