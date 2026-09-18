@@ -19,6 +19,24 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"   # "v1.2.0" -> "1.2.0"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set version in package.json
+        run: |
+          jq --arg v "${{ steps.version.outputs.version }}" \
+             '.version = $v' \
+             Assets/BlueUtils/package.json > /tmp/package.json.tmp
+          mv /tmp/package.json.tmp Assets/BlueUtils/package.json
+
+      - name: Commit version bump (local only)
+        run: |
+          git add Assets/BlueUtils/package.json
+          git commit -m "chore: set package version to ${{ steps.version.outputs.version }}"
+
       - name: Split package subfolder into its own branch
         run: |
           git subtree split --prefix=Assets/BlueUtils -b upm
@@ -29,7 +47,7 @@ jobs:
 
       - name: Tag the published branch with the same version
         run: |
-          VERSION="${GITHUB_REF_NAME}"
           git checkout upm
-          git tag "$VERSION" -f
-          git push origin "$VERSION" -f
+          git tag "v${{ steps.version.outputs.version }}" -f
+          git push origin "v${{ steps.version.outputs.version }}" -f
+          
