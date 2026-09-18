@@ -35,10 +35,10 @@ jobs:
              Assets/BlueUtils/package.json > /tmp/package.json.tmp
           mv /tmp/package.json.tmp Assets/BlueUtils/package.json
 
-      - name: Commit version bump (local only)
+      - name: Amend version bump into current commit (local only)
         run: |
           git add Assets/BlueUtils/package.json
-          git commit -m "chore: set package version to ${{ steps.version.outputs.version }}"
+          git commit --amend --no-edit
 
       - name: Split package subfolder into its own branch
         run: |
