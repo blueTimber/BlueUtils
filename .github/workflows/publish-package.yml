@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"   # trigger on tags like v1.2.0
 
+permissions:
+  contents: write 
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -50,4 +53,3 @@ jobs:
           git checkout upm
           git tag "v${{ steps.version.outputs.version }}" -f
           git push origin "v${{ steps.version.outputs.version }}" -f
-          
