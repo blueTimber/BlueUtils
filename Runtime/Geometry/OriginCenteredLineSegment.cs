@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace BlueUtils.Intersection
+namespace BlueUtils.Geometry
 {
 	public struct OriginCenteredLineSegment
 	{
@@ -32,7 +32,7 @@ namespace BlueUtils.Intersection
 			_end = (end - start).magnitude;
 			_line = new Ray2D(start, (end - start).normalized);
 
-			RestrictToScreen();
+			RestrictToUnitSquare();
 		}
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace BlueUtils.Intersection
 			_end = float.MaxValue;
 			_line = line;
 
-			RestrictToScreen();
+			RestrictToUnitSquare();
 		}
 
 		public OriginCenteredLineSegment(Ray2D line, float start, float end)
@@ -60,12 +60,12 @@ namespace BlueUtils.Intersection
 			_start = start;
 			_end = end;
 
-			RestrictToScreen();
+			RestrictToUnitSquare();
 		}
 
 		#region Public Methods
 
-		public OriginCenteredLineSegment Copy()
+		public readonly OriginCenteredLineSegment Copy()
 		{
 			return new OriginCenteredLineSegment(_line, _start, _end);
 		}
@@ -86,7 +86,7 @@ namespace BlueUtils.Intersection
 			float intersectPoint;
 			try
 			{
-				intersectPoint = IntersectionUtils.RayRay2D(_line, line);
+				intersectPoint = Intersection.RayRay2D(_line, line);
 			}
 			catch
 			{
@@ -109,7 +109,7 @@ namespace BlueUtils.Intersection
 
 		public bool Restrict(Vector2 start, Vector2 end)
 		{
-			Vector2? intersectPoint = IntersectionUtils.LineSegmentLineSegment(StartPoint, EndPoint, start, end);
+			Vector2? intersectPoint = Intersection.LineSegmentLineSegment(StartPoint, EndPoint, start, end);
 			if (!intersectPoint.HasValue) return false;
 
 			float projectedPoint = Comparison.ProjectLength(intersectPoint.Value - _line.origin, _line.direction); 
@@ -133,7 +133,7 @@ namespace BlueUtils.Intersection
 			float intersectPoint;
 			try
 			{
-				intersectPoint = IntersectionUtils.RayRay2D(_line, line);
+				intersectPoint = Intersection.RayRay2D(_line, line);
 			}
 			catch
 			{
@@ -145,7 +145,7 @@ namespace BlueUtils.Intersection
 
 		public readonly Vector2? Intersect(OriginCenteredLineSegment segment)
 		{
-			return IntersectionUtils.LineSegmentLineSegment(
+			return Intersection.LineSegmentLineSegment(
 				_line.GetPoint(_start), _line.GetPoint(_end),
 				segment._line.GetPoint(segment._start), segment._line.GetPoint(segment._end)
 				);
@@ -156,7 +156,7 @@ namespace BlueUtils.Intersection
 			float intersectPoint;
 			try
 			{
-				intersectPoint = IntersectionUtils.RayRay2D(_line, ray);
+				intersectPoint = Intersection.RayRay2D(_line, ray);
 			}
 			catch
 			{
@@ -177,7 +177,11 @@ namespace BlueUtils.Intersection
 
 		#region Private Methods
 
-		private void RestrictToScreen()
+		/// <summary>
+		/// Restrict the line segment to the unit square defined by -1 to 1 on each axis.
+		/// Note: the unit square isn't 1 by 1, it's 2 by 2, but the name is kept for clarity.
+		/// </summary>
+		private void RestrictToUnitSquare()
 		{
 			// Top
 			Restrict(new Ray2D(new Vector2(1.0f, 1.0f), Vector2.left));

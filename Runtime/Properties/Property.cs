@@ -1,16 +1,41 @@
 using BlueUtils.Datastructures;
 using System;
 using System.Linq.Expressions;
+using UnityEngine;
 
-namespace DeliverTheMountain.Properties
+namespace BlueUtils.Properties
 {
-	public class Property<T>
+	public enum OverrideType
 	{
+		Set = 1,
+		Add = 2,
+		Multiply = 3,
+		Max = 4,
+		Min = 5,
+	}
+
+	public abstract class PropertyBase
+	{
+		#region Editor
+#if UNITY_EDITOR
+		public abstract (string, OverrideType, int, string)?[] GetOverridesEditor();
+#endif
+		#endregion
+	}
+
+	[Serializable]
+	public class Property<T>: PropertyBase
+	{
+		#region Editor Variables
+
+		[SerializeField] private T _base;
+		[SerializeField] private T _currentVal;
+
+		[SerializeField] private SortedList<int, PropertyOverride> _overrides;
+
+		#endregion
+
 		#region Variables
-
-		private readonly SortedList<int, PropertyOverride> _overrides;
-
-		private T _currentVal;
 
 		private readonly bool _canAdd;
 		private readonly Func<T, T, T> _add;
@@ -23,14 +48,14 @@ namespace DeliverTheMountain.Properties
 
 		#region Properties
 
-		public T Base { get; }
+		public T Base => _base;
 		public T Value => _currentVal;
 
 		#endregion
 
 		public Property(T value) 
 		{ 
-			Base = value;
+			_base = value;
 			_currentVal = Base;
 			_overrides = new SortedList<int, PropertyOverride>();
 
@@ -82,6 +107,8 @@ namespace DeliverTheMountain.Properties
 				_canCompare = false;
 			}
 		}
+
+		public Property(): this(default) { }
 
 		#region Public Methods
 
@@ -179,16 +206,10 @@ namespace DeliverTheMountain.Properties
 
 		#region Nested
 
-		public enum OverrideType
-		{
-			Set = 1,
-			Add = 2,
-			Multiply = 3,
-			Max = 4,
-			Min = 5,
-		}
+		
 
-		private class PropertyOverride
+		[Serializable]
+		public class PropertyOverride
 		{
 			public T Value;
 			public OverrideType Type;
@@ -197,5 +218,30 @@ namespace DeliverTheMountain.Properties
 		}
 
 		#endregion
+
+		#region Editor
+#if UNITY_EDITOR
+		
+		public override (string, OverrideType, int, string)?[] GetOverridesEditor()
+		{
+			(string, OverrideType, int, string)?[] result = new (string, OverrideType, int, string)?[_overrides.Count];
+			for (int i = 0; i < _overrides.Count; i++)
+			{
+				PropertyOverride propertyOverride = _overrides[i];
+				if (propertyOverride == null)
+				{
+					result[i] = null;
+					continue;
+				}
+				result[i] = (
+					propertyOverride.Value.ToString(), propertyOverride.Type, propertyOverride.Order, 
+					propertyOverride.Source == null ? "Unkown" : propertyOverride.Source.Name
+				);
+			}
+			return result;
+		}
+
+#endif
+	#endregion
 	}
 }
