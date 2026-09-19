@@ -5,13 +5,40 @@ using UnityEngine;
 
 namespace BlueUtils.Datastructures
 {
-	public class SortedList<K,T> : IEnumerable<T>
+	[Serializable]
+	public class Tup<K, T>
 	{
+		public K Item1;
+		public T Item2;
+		public Tup(K item1, T item2)
+		{
+			Item1 = item1;
+			Item2 = item2;
+		}
+	}
+
+	/// <summary>
+	/// A sorted list that doesn't act like a dictionary like the built-in SortedList, 
+	/// but instead acts like a list that is sorted by key. It allows duplicate keys if specified.
+	/// Insertion and removal are O(n) and retrieval is O(1) by index. It is serializable and can be used in Unity.
+	/// It also allows for iteration over the values in the list, but not the keys. 
+	/// If you need to iterate over the keys, you can use a foreach loop over the list and access the key through the Item1 property of each Tup.
+	/// </summary>
+	/// <typeparam name="K"></typeparam>
+	/// <typeparam name="T"></typeparam>
+	[Serializable]
+	public class SortedList<K,T> : IEnumerable<T>, ISerializationCallbackReceiver
+	{
+		#region Editor Variables
+
+		[SerializeField] private bool _uniqueKeys;
+		[SerializeField] private List<Tup<K, T>> _list;
+
+		#endregion
+
 		#region Variables
 
-		private List<(K, T)> _list;
 		private IComparer<K> _comparer;
-		private readonly bool _uniqueKeys;
 
 		#endregion
 
@@ -31,26 +58,28 @@ namespace BlueUtils.Datastructures
 
 		public SortedList(bool uniqueKeys = true)
 		{
-			_list = new List<(K, T)>();
+			_list = new List<Tup<K, T>>();
+			_comparer = Comparer<K>.Default;
 			_uniqueKeys = uniqueKeys;
 		}
 
 		public SortedList(IComparer<K> comparer, bool uniqueKeys = true)
 		{
-			_list = new List<(K, T)>();
+			_list = new List<Tup<K, T>>();
 			_comparer = comparer;
 			_uniqueKeys = uniqueKeys;
 		}
 
 		public SortedList(int capacity, bool uniqueKeys = true)
 		{
-			_list = new List<(K, T)>(capacity);
+			_list = new List<Tup<K, T>>(capacity);
+			_comparer = Comparer<K>.Default;
 			_uniqueKeys = uniqueKeys;
 		}
 
 		public SortedList(int capacity, IComparer<K> comparer, bool uniqueKeys = true)
 		{
-			_list = new List<(K, T)>(capacity);
+			_list = new List<Tup<K, T>>(capacity);
 			_comparer = comparer;
 			_uniqueKeys = uniqueKeys;
 		}
@@ -76,14 +105,12 @@ namespace BlueUtils.Datastructures
 
 		public void Add(K key, T value) 
 		{
-			IComparer<K> comparer = _comparer;
-			comparer ??= Comparer<K>.Default;
 			for (int i = 0; i < _list.Count; i++)
 			{
-				int comp = comparer.Compare(key, _list[i].Item1);
+				int comp = _comparer.Compare(key, _list[i].Item1);
 				if (comp < 0)
 				{
-					_list.Insert(i, (key, value));
+					_list.Insert(i, new(key, value));
 					return;
 				}
 				else if (comp == 0)
@@ -92,11 +119,11 @@ namespace BlueUtils.Datastructures
 					{
 						Debug.LogWarning("Key has already been inserted!");
 					}
-					_list.Insert(i, (key, value));
+					_list.Insert(i, new(key, value));
 					return;
 				}
 			}
-			_list.Add((key, value));
+			_list.Add(new(key, value));
 		}
 
 		public bool Remove(T value) 
@@ -128,6 +155,49 @@ namespace BlueUtils.Datastructures
 		{
 			_list.RemoveAt(index);
 		}
+
+		#endregion
+
+		#region Private Methods
+
+		private void VerifyIntegrity()
+		{
+			// Sort the list
+			_list.Sort((a, b) =>
+			{
+				return _comparer.Compare(a.Item1, b.Item1);
+			});
+
+			// Check for duplicate keys if uniqueKeys is true
+			if (_uniqueKeys)
+			{
+				for (int i = 1; i < _list.Count; i++)
+				{
+					if (_comparer.Compare(_list[i - 1].Item1, _list[i].Item1) == 0)
+					{
+						Debug.LogWarning($"Duplicate key found: {_list[i].Item1}.");
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region Editor
+
+		private void OnValidate()
+		{
+			if (_comparer == null)
+			{
+				_comparer = Comparer<K>.Default;
+			}
+
+			VerifyIntegrity();
+		}
+
+		public void OnBeforeSerialize() => OnValidate();
+
+		public void OnAfterDeserialize() { }
 
 		#endregion
 	}

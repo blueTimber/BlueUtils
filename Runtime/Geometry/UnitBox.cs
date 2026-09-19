@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BlueUtils.Intersection
+namespace BlueUtils.Geometry
 {
 	public static class UnitBox
 	{
@@ -17,10 +17,10 @@ namespace BlueUtils.Intersection
 				new(1, 1),
 				new(-1, 1)
 			};
-			Vector2? inter1 = IntersectionUtils.LineSegmentLineSegment(p1, p2, boxCorners[0], boxCorners[1]);
-			Vector2? inter2 = IntersectionUtils.LineSegmentLineSegment(p1, p2, boxCorners[1], boxCorners[2]);
-			Vector2? inter3 = IntersectionUtils.LineSegmentLineSegment(p1, p2, boxCorners[2], boxCorners[3]);
-			Vector2? inter4 = IntersectionUtils.LineSegmentLineSegment(p1, p2, boxCorners[3], boxCorners[0]);
+			Vector2? inter1 = Intersection.LineSegmentLineSegment(p1, p2, boxCorners[0], boxCorners[1]);
+			Vector2? inter2 = Intersection.LineSegmentLineSegment(p1, p2, boxCorners[1], boxCorners[2]);
+			Vector2? inter3 = Intersection.LineSegmentLineSegment(p1, p2, boxCorners[2], boxCorners[3]);
+			Vector2? inter4 = Intersection.LineSegmentLineSegment(p1, p2, boxCorners[3], boxCorners[0]);
 			if (inter1.HasValue) intersections.Add(inter1.Value);
 			if (inter2.HasValue) intersections.Add(inter2.Value);
 			if (inter3.HasValue) intersections.Add(inter3.Value);

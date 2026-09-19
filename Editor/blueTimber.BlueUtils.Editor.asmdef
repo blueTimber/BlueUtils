@@ -1,8 +1,12 @@
 {
-    "name": "BlueUtils.Runtime",
+    "name": "blueTimber.BlueUtils.Editor",
     "rootNamespace": "",
-    "references": [],
-    "includePlatforms": [],
+    "references": [
+        "GUID:e439991644ca36c49bb5b33b96ba1e99"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
