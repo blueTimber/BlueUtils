@@ -1,4 +1,6 @@
-namespace DeliverTheMountain.Properties
+using System;
+
+namespace BlueUtils.Properties
 {
 	public interface IPropertyOverrider
 	{

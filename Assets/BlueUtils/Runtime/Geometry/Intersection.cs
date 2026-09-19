@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-namespace BlueUtils.Intersection
+namespace BlueUtils.Geometry
 {
 	/// <summary>
 	/// Helper class for handling intersections.
 	/// </summary>
-	public static class IntersectionUtils
+	public static class Intersection
 	{
 		/// <summary>
 		/// Calculate instersection point between two lines.
@@ -24,6 +24,13 @@ namespace BlueUtils.Intersection
 			return intersectionPoint;
 		}
 
+		public static Vector2 LineLine2D(Vector2 origin1, Vector2 direction1, Vector2 origin2, Vector2 direction2)
+		{
+			float u = RayRay2D(origin1, direction1, origin2, direction2);
+			Vector2 intersectionPoint = origin1 + u * direction1.normalized;
+			return intersectionPoint;
+		}
+
 		public static float RayRay2D(Ray2D ray1, Ray2D ray2)
 		{
 			return RayRay2D(ray1.origin, ray1.direction, ray2.origin, ray2.direction);
@@ -37,7 +44,7 @@ namespace BlueUtils.Intersection
 			float denominator = (origin2.x - dirPoint1.x) * (origin1.y - dirPoint2.y)
 				- (origin2.y - dirPoint1.y) * (origin1.x - dirPoint2.x);
 			if (Mathf.Abs(denominator) <= 0.0001f)
-				throw new Exception();
+				throw new InvalidOperationException();
 
 			float numerator = (origin2.x - origin1.x) * (origin2.y - dirPoint1.y) - (origin2.y - origin1.y) * (origin2.x - dirPoint1.x);
 
@@ -46,21 +53,21 @@ namespace BlueUtils.Intersection
 			return u;
 		}
 
-		public static Vector2? LineSegmentLineSegment(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
+		public static Vector2? LineSegmentLineSegment(Vector2 l1start, Vector2 l1end, Vector2 l2start, Vector2 l2end)
 		{
-			float den = ((p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x));
+			float den = ((l1start.x - l1end.x) * (l2start.y - l2end.y) - (l1start.y - l1end.y) * (l2start.x - l2end.x));
 			if (den == 0.0f) return null;
 
-			float t = ((p1.x - p3.x) * (p3.y - p4.y) - (p1.y - p3.y) * (p3.x - p4.x)) / den;
+			float t = ((l1start.x - l2start.x) * (l2start.y - l2end.y) - (l1start.y - l2start.y) * (l2start.x - l2end.x)) / den;
 
-			float u = ((p1.x - p3.x) * (p1.y - p2.y) - (p1.y - p3.y) * (p1.x - p2.x)) / den;
+			float u = ((l1start.x - l2start.x) * (l1start.y - l1end.y) - (l1start.y - l2start.y) * (l1start.x - l1end.x)) / den;
 
 			if (t < 0.0f || t > 1.0f || u < 0.0f || u > 1.0f) return null;
 
-			return p1 + (p2 - p1) * t;
+			return l1start + (l1end - l1start) * t;
 		}
 
-		public static bool PointRay2D(Vector2 point, Ray2D ray, float maxDistance = 0.001f)
+		public static bool IsPointOnRay2D(Vector2 point, Ray2D ray, float maxDistance = 0.001f)
 		{
 			float d = Vector2.Dot(point, ray.direction) - Vector2.Dot(ray.origin, ray.direction);
 			Vector2 difference = point - ray.origin - d * ray.direction;
@@ -91,7 +98,7 @@ namespace BlueUtils.Intersection
 		/// <param name="line2start"></param>
 		/// <param name="line2end"></param>
 		/// <returns>Returns the closest points on the two lines as a tuple of Vector2. If the lines are parallel, returns null.</returns>
-		public static (Vector2, Vector2)? ClosestPointOnLines2D(Vector2 line1start, Vector2 line1end, Vector2 line2start, Vector2 line2end)
+		public static (Vector2, Vector2)? ClosestPointBetweenLines2D(Vector2 line1start, Vector2 line1end, Vector2 line2start, Vector2 line2end)
 		{
 			// Calculate the direction vectors of the lines
 			Vector2 line1Dir = (line1end - line1start).normalized;

@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace BlueUtils.Intersection
+namespace BlueUtils.Geometry
 {
 	public static class Comparison
 	{
