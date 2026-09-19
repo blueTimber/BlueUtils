@@ -83,24 +83,18 @@ namespace BlueUtils.Geometry
 		/// <returns>True if the line was changed.</returns>
 		public bool Restrict(Ray2D line)
 		{
-			float intersectPoint;
-			try
-			{
-				intersectPoint = Intersection.RayRay2D(_line, line);
-			}
-			catch
-			{
-				return false;
-			}
+			float? intersectPoint = Intersection2D.RayRay(_line, line);
+			if (!intersectPoint.HasValue) return false;
+
 
 			if (intersectPoint >= 0.0f && intersectPoint < _end)
 			{
-				_end = intersectPoint;
+				_end = intersectPoint.Value;
 				return true;
 			}
 			else if (intersectPoint < 0.0f && intersectPoint > _start)
 			{
-				_start = intersectPoint;
+				_start = intersectPoint.Value;
 				return true;
 			}
 
@@ -109,10 +103,10 @@ namespace BlueUtils.Geometry
 
 		public bool Restrict(Vector2 start, Vector2 end)
 		{
-			Vector2? intersectPoint = Intersection.LineSegmentLineSegment(StartPoint, EndPoint, start, end);
+			Vector2? intersectPoint = Intersection2D.LineSegmentLineSegment(StartPoint, EndPoint, start, end);
 			if (!intersectPoint.HasValue) return false;
 
-			float projectedPoint = Comparison.ProjectLength(intersectPoint.Value - _line.origin, _line.direction); 
+			float projectedPoint = Projection2D.ProjectLength(intersectPoint.Value - _line.origin, _line.direction); 
 
 			if (projectedPoint >= 0.0f && projectedPoint < _end)
 			{
@@ -128,24 +122,24 @@ namespace BlueUtils.Geometry
 			return false;
 		}
 
-		public readonly OriginCenteredLineSegment? Split(Ray2D line)
-		{
-			float intersectPoint;
-			try
-			{
-				intersectPoint = Intersection.RayRay2D(_line, line);
-			}
-			catch
-			{
-				return null;
-			}
+		//public readonly OriginCenteredLineSegment? Split(Ray2D line)
+		//{
+		//	float? intersectPoint;
+		//	try
+		//	{
+		//		intersectPoint = Intersection2D.RayRay(_line, line);
+		//	}
+		//	catch
+		//	{
+		//		return null;
+		//	}
 
-			return null;
-		}
+		//	return null;
+		//}
 
 		public readonly Vector2? Intersect(OriginCenteredLineSegment segment)
 		{
-			return Intersection.LineSegmentLineSegment(
+			return Intersection2D.LineSegmentLineSegment(
 				_line.GetPoint(_start), _line.GetPoint(_end),
 				segment._line.GetPoint(segment._start), segment._line.GetPoint(segment._end)
 				);
@@ -153,19 +147,13 @@ namespace BlueUtils.Geometry
 
 		public readonly Vector2? Intersect(Ray2D ray)
 		{
-			float intersectPoint;
-			try
-			{
-				intersectPoint = Intersection.RayRay2D(_line, ray);
-			}
-			catch
-			{
-				return null;
-			}
+			float? intersectPoint = Intersection2D.RayRay(_line, ray);
+			if (!intersectPoint.HasValue) return null;
+
 
 			if (intersectPoint >= _start && intersectPoint <= _end)
 			{
-				return _line.GetPoint(intersectPoint);
+				return _line.GetPoint(intersectPoint.Value);
 			}
 			else
 			{

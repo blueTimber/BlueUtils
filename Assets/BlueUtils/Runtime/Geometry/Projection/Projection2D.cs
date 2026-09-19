@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace BlueUtils.Geometry
 {
-	public static class Comparison
+	public static partial class Projection2D
 	{
 		/// <summary>
 		/// Projects a vector onto another vector.
@@ -29,14 +29,6 @@ namespace BlueUtils.Geometry
 		{
 			float dot = Vector2.Dot(vector, onto);
 			return dot / onto.magnitude;
-		}
-
-
-		public static Vector2[] OrderLeftToRight(Vector2[] points, Vector2 up)
-		{
-			Vector2 left = Vector2.Perpendicular(up).normalized;
-			Vector2[] ordered = points.OrderBy(points => -Vector2.Dot(points, left)).ToArray();
-			return ordered;
 		}
 	}
 }

@@ -8,11 +8,12 @@ namespace BlueUtils.Tests.Geometry
 		[Test]
 		public void LineLine2DPerpendicular()
 		{
-			Assert.Throws<System.InvalidOperationException>(() => 
-				Intersection.LineLine2D(
+			Assert.AreSame(
+				Intersection2D.LineLine(
 					new UnityEngine.Ray2D(UnityEngine.Vector2.zero, UnityEngine.Vector2.right), 
 					new UnityEngine.Ray2D(UnityEngine.Vector2.zero, UnityEngine.Vector2.left)
-				)
+				).HasValue, 
+				false
 			);
 		}
 	}
