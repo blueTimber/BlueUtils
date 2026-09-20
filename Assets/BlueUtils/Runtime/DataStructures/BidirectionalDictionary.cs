@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 namespace BlueUtils.DataStructures
 {
-    public class BidirectionalDictionary<T1, T2>
-    {
+	public class BidirectionalDictionary<T1, T2>
+	{
 		#region Variables
 
 		private Dictionary<T1, T2> _forward = new();
@@ -52,6 +52,26 @@ namespace BlueUtils.DataStructures
 				return true;
 			}
 			return false;
+		}
+
+		public void Clear()
+		{
+			_forward.Clear();
+			_reverse.Clear();
+		}
+
+		public T1[] FirstArray()
+		{
+			T1[] array = new T1[_forward.Count];
+			_forward.Keys.CopyTo(array, 0);
+			return array;
+		}
+
+		public T2[] SecondArray()
+		{
+			T2[] array = new T2[_reverse.Count];
+			_reverse.Keys.CopyTo(array, 0);
+			return array;
 		}
 
 		#endregion
