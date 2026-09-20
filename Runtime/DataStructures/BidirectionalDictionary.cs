@@ -16,6 +16,8 @@ namespace BlueUtils.DataStructures
 		public Indexer<T1, T2> Forward { get; private set; }
 		public Indexer<T2, T1> Reverse { get; private set; }
 
+		public int Count => _forward.Count;
+
 		#endregion
 
 		public BidirectionalDictionary()
@@ -26,10 +28,32 @@ namespace BlueUtils.DataStructures
 
 		#region Public Methods
 
-		public void Add(T1 t1, T2 t2)
+		/// <summary>
+		/// Add a pair. Will fail if either of the values already exists.
+		/// </summary>
+		/// <param name="t1"></param>
+		/// <param name="t2"></param>
+		/// <returns></returns>
+		public bool Add(T1 t1, T2 t2)
 		{
+			// Ensure pairs stay bidirectional
+			if (_forward.ContainsKey(t1) || _reverse.ContainsKey(t2)) return false;
+
 			_forward.Add(t1, t2);
 			_reverse.Add(t2, t1);
+			return true;
+		}
+
+		/// <summary>
+		/// The same as Add, but it will delete any clashing pair.
+		/// </summary>
+		/// <param name="t1"></param>
+		/// <param name="t2"></param>
+		public void Set(T1 t1, T2 t2)
+		{
+			RemoveByFirst(t1);
+			RemoveBySecond(t2);
+			Add(t1, t2);
 		}
 
 		public bool RemoveByFirst(T1 t1)
@@ -84,7 +108,6 @@ namespace BlueUtils.DataStructures
 			public T4 this[T3 index]
 			{
 				get { return _dictionary[index]; }
-				set { _dictionary[index] = value; }
 			}
 
 			public Indexer(Dictionary<T3, T4> dictionary)
