@@ -1,0 +1,88 @@
+using System.Collections.Generic;
+
+namespace BlueUtils.DataStructures
+{
+    public class BidirectionalDictionary<T1, T2>
+    {
+		#region Variables
+
+		private Dictionary<T1, T2> _forward = new();
+		private Dictionary<T2, T1> _reverse = new();
+
+		#endregion
+
+		#region Properties
+
+		public Indexer<T1, T2> Forward { get; private set; }
+		public Indexer<T2, T1> Reverse { get; private set; }
+
+		#endregion
+
+		public BidirectionalDictionary()
+		{
+			this.Forward = new Indexer<T1, T2>(_forward);
+			this.Reverse = new Indexer<T2, T1>(_reverse);
+		}
+
+		#region Public Methods
+
+		public void Add(T1 t1, T2 t2)
+		{
+			_forward.Add(t1, t2);
+			_reverse.Add(t2, t1);
+		}
+
+		public bool RemoveByFirst(T1 t1)
+		{
+			if (_forward.TryGetValue(t1, out T2 t2))
+			{
+				_forward.Remove(t1);
+				_reverse.Remove(t2);
+				return true;
+			}
+			return false;
+		}
+
+		public bool RemoveBySecond(T2 t2)
+		{
+			if (_reverse.TryGetValue(t2, out T1 t1))
+			{
+				_reverse.Remove(t2);
+				_forward.Remove(t1);
+				return true;
+			}
+			return false;
+		}
+
+		#endregion
+
+		#region Nested 
+
+		public class Indexer<T3, T4>
+		{
+			private Dictionary<T3, T4> _dictionary;
+			public T4 this[T3 index]
+			{
+				get { return _dictionary[index]; }
+				set { _dictionary[index] = value; }
+			}
+
+			public Indexer(Dictionary<T3, T4> dictionary)
+			{
+				_dictionary = dictionary;
+			}
+			
+			public bool ContainsKey(T3 key)
+			{
+				return _dictionary.ContainsKey(key);
+			}
+
+			public bool TryGetValue(T3 key, out T4 value)
+			{
+				return _dictionary.TryGetValue(key, out value);
+			}
+		}
+
+		#endregion
+	}
+}
