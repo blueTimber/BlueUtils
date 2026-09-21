@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BlueUtils.DataStructures
+namespace BlueUtils.Datastructures
 {
 	public class BidirectionalDictionary<T1, T2>
 	{

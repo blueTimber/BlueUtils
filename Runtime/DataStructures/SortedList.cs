@@ -22,17 +22,17 @@ namespace BlueUtils.Datastructures
 	/// but instead acts like a list that is sorted by key. It allows duplicate keys if specified.
 	/// Insertion and removal are O(n) and retrieval is O(1) by index. It is serializable and can be used in Unity.
 	/// It also allows for iteration over the values in the list, but not the keys. 
-	/// If you need to iterate over the keys, you can use a foreach loop over the list and access the key through the Item1 property of each Tup.
+	/// If you need to iterate over the keys, you can use a foreach loop over the Pairs property and access the key through the Item1 property of each Tup.
 	/// </summary>
 	/// <typeparam name="K"></typeparam>
-	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="V"></typeparam>
 	[Serializable]
-	public class SortedList<K,T> : IEnumerable<T>, ISerializationCallbackReceiver
+	public class SortedList<K,V> : IEnumerable<V>, ISerializationCallbackReceiver
 	{
 		#region Editor Variables
 
 		[SerializeField] private bool _uniqueKeys;
-		[SerializeField] private List<Tup<K, T>> _list;
+		[SerializeField] private List<Tup<K, V>> _list;
 
 		#endregion
 
@@ -44,7 +44,7 @@ namespace BlueUtils.Datastructures
 
 		#region Properties
 
-		public T this[int index]
+		public V this[int index]
 		{
 			get
 			{
@@ -54,39 +54,41 @@ namespace BlueUtils.Datastructures
 
 		public int Count => _list.Count;
 
+		public List<Tup<K, V>> Pairs => _list;
+
 		#endregion
 
 		public SortedList(bool uniqueKeys = true)
 		{
-			_list = new List<Tup<K, T>>();
+			_list = new List<Tup<K, V>>();
 			_comparer = Comparer<K>.Default;
 			_uniqueKeys = uniqueKeys;
 		}
 
 		public SortedList(IComparer<K> comparer, bool uniqueKeys = true)
 		{
-			_list = new List<Tup<K, T>>();
+			_list = new List<Tup<K, V>>();
 			_comparer = comparer;
 			_uniqueKeys = uniqueKeys;
 		}
 
 		public SortedList(int capacity, bool uniqueKeys = true)
 		{
-			_list = new List<Tup<K, T>>(capacity);
+			_list = new List<Tup<K, V>>(capacity);
 			_comparer = Comparer<K>.Default;
 			_uniqueKeys = uniqueKeys;
 		}
 
 		public SortedList(int capacity, IComparer<K> comparer, bool uniqueKeys = true)
 		{
-			_list = new List<Tup<K, T>>(capacity);
+			_list = new List<Tup<K, V>>(capacity);
 			_comparer = comparer;
 			_uniqueKeys = uniqueKeys;
 		}
 
 		#region IEnumerable Implementation
 
-		public IEnumerator<T> GetEnumerator()
+		public IEnumerator<V> GetEnumerator()
 		{
 			for (int i = 0; i < _list.Count; i++)
 			{
@@ -103,7 +105,13 @@ namespace BlueUtils.Datastructures
 
 		#region Public Methods
 
-		public void Add(K key, T value) 
+		/// <summary>
+		/// Add a value by key. Fails if no duplate keys is true and the key already exists.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public bool Add(K key, V value, bool overrideDuplicate = false) 
 		{
 			for (int i = 0; i < _list.Count; i++)
 			{
@@ -111,26 +119,32 @@ namespace BlueUtils.Datastructures
 				if (comp < 0)
 				{
 					_list.Insert(i, new(key, value));
-					return;
+					return true;
 				}
 				else if (comp == 0)
 				{
-					if (_uniqueKeys)
-					{
-						Debug.LogWarning("Key has already been inserted!");
-					}
+					if (_uniqueKeys) 
+					{ 
+						if (overrideDuplicate)
+						{
+							_list[i] = new(key, value);
+						}
+						return false;
+					} 
+					
 					_list.Insert(i, new(key, value));
-					return;
+					return true;
 				}
 			}
 			_list.Add(new(key, value));
+			return true;
 		}
 
-		public bool Remove(T value) 
+		public bool Remove(V value) 
 		{ 
 			for (int i = 0; i < _list.Count; i++)
 			{
-				if (EqualityComparer<T>.Default.Equals(_list[i].Item2, value))
+				if (EqualityComparer<V>.Default.Equals(_list[i].Item2, value))
 				{
 					_list.RemoveAt(i);
 					return true;
@@ -139,7 +153,7 @@ namespace BlueUtils.Datastructures
 			return false;
 		}
 
-		public void RemoveAll(Func<T,bool> predicate)
+		public void RemoveAll(Func<V,bool> predicate)
 		{
 			for (int i = 0; i < _list.Count; i++)
 			{
@@ -154,6 +168,21 @@ namespace BlueUtils.Datastructures
 		public void RemoveAt(int index)
 		{
 			_list.RemoveAt(index);
+		}
+
+		public V Pop()
+		{
+			if (_list.Count == 0) throw new ArgumentOutOfRangeException();
+
+			V result = _list[0].Item2;
+			RemoveAt(0);
+
+			return result;
+		}
+
+		public void Clear()
+		{
+			_list.Clear();
 		}
 
 		#endregion
