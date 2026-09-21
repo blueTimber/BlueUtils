@@ -1,9 +1,9 @@
 {
-	"name": "com.bluetimber.blueutils",
-	"version": "1.0.0",
-	"displayName": "BlueUtils",
-	"author": {
-		"name": "Jonte Herben",
-		"url": "https://github.com/blueTimber"
-	}
+  "name": "com.bluetimber.blueutils",
+  "version": "3.3.0",
+  "displayName": "BlueUtils",
+  "author": {
+    "name": "Jonte Herben",
+    "url": "https://github.com/blueTimber"
+  }
 }
