@@ -28,11 +28,11 @@ namespace BlueUtils.Pathfinding
 
 		#region Public Methods
 
-		public Node[] CalculatePath(Node start, Node end)
+		public (Node[] Nodes, float Length)? CalculatePath(Node start, Node end)
 		{
 			if (start == null || end == null) return null;
 
-			if (start == end) return new Node[] { start };
+			if (start == end) return (new Node[] { start }, 0f);
 			
 			_queue.Clear();
 			_nodes.Clear();
@@ -53,7 +53,7 @@ namespace BlueUtils.Pathfinding
 					if (current.Closed) continue; // stale entry
 
 					// Check if we reached the end
-					if (currentNode == end) return current.Collect(_nodes, currentNodeIndex);
+					if (currentNode == end) return (current.Collect(_nodes, currentNodeIndex), current.DistToNode);
 
 					current.Closed = true;
 					_nodes[currentNodeIndex] = current;
