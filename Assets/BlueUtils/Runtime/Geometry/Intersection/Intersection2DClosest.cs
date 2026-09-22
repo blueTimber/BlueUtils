@@ -10,13 +10,14 @@ namespace BlueUtils.Geometry
 		/// </summary>
 		public static Vector2 ClosestPointOnLineSegment(Vector2 lineStart, Vector2 lineEnd, Vector2 point)
 		{
-			Vector2 lineDir = (lineEnd - lineStart).normalized;
-			float t = Vector2.Dot(point - lineStart, lineDir);
-			if (t < 0)
+			Vector2 line = lineEnd - lineStart;
+			float lineSqrMag = line.sqrMagnitude;
+			if (lineSqrMag < Mathf.Epsilon)
 				return lineStart;
-			else if (t * t > (lineEnd - lineStart).sqrMagnitude)
-				return lineEnd;
-			return lineStart + t * lineDir;
+
+			float t = Vector2.Dot(point - lineStart, line) / lineSqrMag;
+			t = Mathf.Clamp01(t);
+			return lineStart + t * line;
 		}
 
 		/// <summary>
